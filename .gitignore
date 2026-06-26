@@ -1,0 +1,8 @@
+config/
+defaultconfigs/
+kubejs/
+libraries/
+mods/
+run.bat
+server.properties
+user_jvm_args.txt
