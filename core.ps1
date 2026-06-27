@@ -34,3 +34,22 @@ catch {
         -UsePwSh $usePwShSwitch
     exit
 }
+if ([string]::IsNullOrWhiteSpace($userConfig.javaPath)) {
+    New-AsyncNotice `
+        -ScriptPath "$($PSScriptRoot)\ymsa_module\null_param_alarm_script.ps1" `
+        -UsePwSh $usePwShSwitch
+    exit
+}
+if (-not ($userConfig.javaParam -is [array])) {
+    # 萌新：哎这个方括号（数组）是什么？是不是写错了？我把它改成双引号（字符串）吧！这下对了！
+    New-AsyncNotice `
+        -ScriptPath "$($PSScriptRoot)\ymsa_module\param_type_error_alarm_script.ps1" `
+        -UsePwSh $usePwShSwitch
+    exit
+}
+if ($userConfig.javaParam.Count -eq 0) {
+    New-AsyncNotice `
+        -ScriptPath "$($PSScriptRoot)\ymsa_module\null_param_alarm_script.ps1" `
+        -UsePwSh $usePwShSwitch
+    exit
+}
