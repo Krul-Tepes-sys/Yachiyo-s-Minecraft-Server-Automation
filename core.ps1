@@ -8,7 +8,13 @@ Yachiyo's Minecraft Server Automation (YMSA)
 # 根据PS版本选择运行逻辑
 # 我求你了不是5.1就一定要是7+，别给我从哪整个超冷门版本然后一个Issue过来问我为什么用不了
 if ($PSVersionTable.PSVersion.Major -ge 7) {
-    $usePwShSwitch = $true
+    $hasPwSh = Get-Command pwsh.exe -ErrorAction SilentlyContinue
+    # 什么叫你的PS7是绿色版并且没手动加path？
+    if ($hasPwSh) {
+        $usePwShSwitch = $true
+    } else {
+        $usePwShSwitch = $false
+    }
 } else {
     $usePwShSwitch = $false
 }
