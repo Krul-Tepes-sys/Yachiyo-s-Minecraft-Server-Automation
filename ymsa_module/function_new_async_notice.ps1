@@ -1,7 +1,7 @@
 ﻿function New-AsyncNotice {
     param (
         [string]$ScriptPath,
-        [switch]$UsePwSh
+        $UsePwSh
     )
     if ($UsePwSh) {$psFileName = "pwsh.exe"} else {$psFileName = "powershell.exe"} # 你真的心甘情愿用一辈子PS5.1吗？
     Start-Process `
