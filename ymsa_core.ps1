@@ -81,7 +81,7 @@ if (Test-Path "$($PSScriptRoot)\ymsa_module\temp_running_flag") {
         -UsePwSh $usePwShSwitch
     exit
 } else {
-    New-Item "$($PSScriptRoot)\ymsa_module\temp_running_flag" # 记得Remove-Item啊不然就成一次性脚本了
+    $null = New-Item "$($PSScriptRoot)\ymsa_module\temp_running_flag"
 }
 
 # 死循环启动！
