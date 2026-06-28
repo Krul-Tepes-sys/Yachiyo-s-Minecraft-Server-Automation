@@ -43,7 +43,7 @@ if ([string]::IsNullOrWhiteSpace($userConfig.javaPath)) {
     exit
 }
 # 校验Java参数是不是数组
-if (-not ($userConfig.javaParam -is [array])) {
+if (-not ($userConfig.javaArgs -is [array])) {
     # 萌新：哎这个方括号（数组）是什么？是不是写错了？我把它改成双引号（字符串）吧！这下对了！
     New-AsyncNotice `
         -ScriptPath "$($PSScriptRoot)\ymsa_module\param_type_error_alarm_script.ps1" `
@@ -51,7 +51,7 @@ if (-not ($userConfig.javaParam -is [array])) {
     exit
 }
 # Java参数空数组校验
-if ($userConfig.javaParam.Count -eq 0) {
+if ($userConfig.javaArgs.Count -eq 0) {
     New-AsyncNotice `
         -ScriptPath "$($PSScriptRoot)\ymsa_module\null_param_alarm_script.ps1" `
         -UsePwSh $usePwShSwitch
@@ -75,20 +75,49 @@ if (-not (Test-Path $userConfig.javaPath)) {
 }
 
 # 死循环启动！
+$startDateTime = Get-Date
+$crashCount = 0
 while ($true) {
-    $startDateTime = Get-Date
-    & $userConfig.javaPath $userConfig.javaParam
+    & $userConfig.javaPath $userConfig.javaArgs
     $exitCode = $LASTEXITCODE
     if ($exitCode -eq 0) {
         exit
     } else {
-        $firstCrashDateTime = Get-Date
-        $runTimeSpan = $firstCrashDateTime - $startDateTime
-        if ($runTimeSpan.TotalSeconds -le 15) {
-            New-AsyncNotice `
-                -ScriptPath "$($PSScriptRoot)\ymsa_module\java_param_maybe_error_alarm_script.ps1" `
-                -UsePwSh $usePwShSwitch
-            exit
+        $crashCount++
+        if ($crashCount -eq 1) {
+            $firstCrashDateTime = Get-Date
+            $runTimeSpan = $firstCrashDateTime - $startDateTime
+            if ($runTimeSpan.TotalSeconds -le 15) {
+                New-AsyncNotice `
+                    -ScriptPath "$($PSScriptRoot)\ymsa_module\java_param_maybe_error_alarm_script.ps1" `
+                    -UsePwSh $usePwShSwitch
+                exit
+            } else {
+                New-AsyncNotice `
+                    -ScriptPath "$($PSScriptRoot)\ymsa_module\server_crash_warn_script.ps1" `
+                    -UsePwSh $usePwShSwitch
+            }
+        } elseif ($crashCount -eq 2) {
+            $secondCrashDateTime = Get-Date
+            $runTimeSpan = $secondCrashDateTime - $firstCrashDateTime
+            if ($runTimeSpan.TotalSeconds -gt $userConfig.carshTimeLimit) {
+                $crashCount = 0
+            } else {
+                New-AsyncNotice `
+                    -ScriptPath "$($PSScriptRoot)\ymsa_module\server_crash_warn_script.ps1" `
+                    -UsePwSh $usePwShSwitch
+            }
+        } elseif ($crashCount -ge 3) {
+            $thirdCrashDateTime = Get-Date
+            $runTimeSpan = $thirdCrashDateTime - $firstCrashDateTime
+            if ($runTimeSpan.TotalSeconds -gt $userConfig.carshTimeLimit) {
+                $crashCount = 0
+            } else {
+                New-AsyncNotice `
+                    -ScriptPath "$($PSScriptRoot)\ymsa_module\safe_mode_anti_infinite_crash_script.ps1" `
+                    -UsePwSh $usePwShSwitch
+                exit
+            }
         }
     }
 }

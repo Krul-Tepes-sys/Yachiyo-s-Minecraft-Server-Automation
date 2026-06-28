@@ -6,3 +6,5 @@ mods/
 run.bat
 server.properties
 user_jvm_args.txt
+logs/
+eula.txt
