@@ -73,3 +73,22 @@ if (-not (Test-Path $userConfig.javaPath)) {
         -UsePwSh $usePwShSwitch
     exit
 }
+
+# 死循环启动！
+while ($true) {
+    $startDateTime = Get-Date
+    & $userConfig.javaPath $userConfig.javaParam
+    $exitCode = $LASTEXITCODE
+    if ($exitCode -eq 0) {
+        exit
+    } else {
+        $firstCrashDateTime = Get-Date
+        $runTimeSpan = $firstCrashDateTime - $startDateTime
+        if ($runTimeSpan.TotalSeconds -le 15) {
+            New-AsyncNotice `
+                -ScriptPath "$($PSScriptRoot)\ymsa_module\java_param_maybe_error_alarm_script.ps1" `
+                -UsePwSh $usePwShSwitch
+            exit
+        }
+    }
+}
