@@ -74,6 +74,16 @@ if (-not (Test-Path $userConfig.javaPath)) {
     exit
 }
 
+# 运行标记检查
+if (Test-Path "$($PSScriptRoot)\ymsa_module\temp_running_flag") {
+    New-AsyncNotice `
+        -ScriptPath "$($PSScriptRoot)\ymsa_module\safe_mode_anti_infinite_bsod_script.ps1" `
+        -UsePwSh $usePwShSwitch
+    exit
+} else {
+    New-Item "$($PSScriptRoot)\ymsa_module\temp_running_flag" # 记得Remove-Item啊不然就成一次性脚本了
+}
+
 # 死循环启动！
 $startDateTime = Get-Date
 $crashCount = 0
@@ -81,6 +91,7 @@ while ($true) {
     & $userConfig.javaPath $userConfig.javaArgs
     $exitCode = $LASTEXITCODE
     if ($exitCode -eq 0) {
+        Remove-Item "$($PSScriptRoot)\ymsa_module\temp_running_flag"
         exit
     } else {
         $crashCount++
@@ -91,6 +102,7 @@ while ($true) {
                 New-AsyncNotice `
                     -ScriptPath "$($PSScriptRoot)\ymsa_module\java_param_maybe_error_alarm_script.ps1" `
                     -UsePwSh $usePwShSwitch
+                Remove-Item "$($PSScriptRoot)\ymsa_module\temp_running_flag"
                 exit
             } else {
                 New-AsyncNotice `
@@ -116,6 +128,7 @@ while ($true) {
                 New-AsyncNotice `
                     -ScriptPath "$($PSScriptRoot)\ymsa_module\safe_mode_anti_infinite_crash_script.ps1" `
                     -UsePwSh $usePwShSwitch
+                Remove-Item "$($PSScriptRoot)\ymsa_module\temp_running_flag"
                 exit
             }
         }
