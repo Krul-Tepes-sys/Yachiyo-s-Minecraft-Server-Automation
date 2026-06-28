@@ -24,6 +24,7 @@ if ($PSVersionTable.PSVersion.Major -ge 7) {
 . "$($PSScriptRoot)\ymsa_module\function_new_async_notice.ps1"
 
 # 用户配置检查
+# 导入Json
 try {
     $userConfigRaw = Get-Content "$($PSScriptRoot)\ymsa_module\user_config.json" -Raw -ErrorAction Stop
     $userConfig = ConvertFrom-Json $userConfigRaw -ErrorAction Stop
@@ -34,12 +35,14 @@ catch {
         -UsePwSh $usePwShSwitch
     exit
 }
+# Java路径空字符串校验
 if ([string]::IsNullOrWhiteSpace($userConfig.javaPath)) {
     New-AsyncNotice `
         -ScriptPath "$($PSScriptRoot)\ymsa_module\null_param_alarm_script.ps1" `
         -UsePwSh $usePwShSwitch
     exit
 }
+# 校验Java参数是不是数组
 if (-not ($userConfig.javaParam -is [array])) {
     # 萌新：哎这个方括号（数组）是什么？是不是写错了？我把它改成双引号（字符串）吧！这下对了！
     New-AsyncNotice `
@@ -47,9 +50,26 @@ if (-not ($userConfig.javaParam -is [array])) {
         -UsePwSh $usePwShSwitch
     exit
 }
+# Java参数空数组校验
 if ($userConfig.javaParam.Count -eq 0) {
     New-AsyncNotice `
         -ScriptPath "$($PSScriptRoot)\ymsa_module\null_param_alarm_script.ps1" `
+        -UsePwSh $usePwShSwitch
+    exit
+}
+# Java路径有效性校验
+$javaPathFileName = Split-Path $userConfig.javaPath -Leaf -ErrorAction SilentlyContinue # 无视报错继续运行！
+if (-not $javaPathFileName -eq "java.exe") {
+    # 我不信哪个Java发行版的可执行文件不是java.exe
+    # 别跟我提跨平台，真要跨平台首先WinForms直接就炸了
+    New-AsyncNotice `
+        -ScriptPath "$($PSScriptRoot)\ymsa_module\java_path_void_alarm_script.ps1" `
+        -UsePwSh $usePwShSwitch
+    exit
+}
+if (-not (Test-Path $userConfig.javaPath)) {
+    New-AsyncNotice `
+        -ScriptPath "$($PSScriptRoot)\ymsa_module\java_path_void_alarm_script.ps1" `
         -UsePwSh $usePwShSwitch
     exit
 }
