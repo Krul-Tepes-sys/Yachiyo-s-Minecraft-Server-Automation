@@ -32,6 +32,7 @@ catch {
         "-Level","Red",
         "-Text","导入Json文件失败（1）",
         "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
+        "-ServerName","XX",
         "-NoticeOnly"
     )
     Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
@@ -42,6 +43,16 @@ try {
     $userConfig = ConvertFrom-Json $userConfigRaw -ErrorAction Stop
 }
 catch {
+    $argList = @(
+        "-ExecutionPolicy","RemoteSigned",
+        "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
+        "-Level","Red",
+        "-Text","解析Json文件失败（2）",
+        "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
+        "-ServerName","XX",
+        "-NoticeOnly"
+    )
+    Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
     exit
 }
 # Java路径空字符串校验
