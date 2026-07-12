@@ -9,7 +9,8 @@
         [string]$MuteText = "关闭警报声",
         [string]$HelpText = "帮助",
         [string]$HelpPath,
-        [switch]$NoticeOnly
+        [switch]$NoticeOnly,
+        [string]$ServerName = "未命名服务端"
     )
     Add-Type -AssemblyName System.Windows.Forms
     Add-Type -AssemblyName System.Drawing
@@ -20,19 +21,19 @@
     $mainForm.Size = New-Object System.Drawing.Size(400, 200)
     $mainForm.FormBorderStyle = "Sizable"
     $mainForm.SizeGripStyle = "Hide"
-    $dateTime = Get-Date -Format "yyyy/MM/dd HH:mm:ss"
+    $dateTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     if ($Level -eq "Yellow") {
         $mainForm.BackColor = [System.Drawing.Color]::FromArgb(255,255,0)
-        $mainForm.Text = "Warning -- $($dateTime)"
+        $mainForm.Text = "Warning - $($ServerName) - $($dateTime)"
     } elseif ($Level -eq "Orange") {
         $mainForm.BackColor = [System.Drawing.Color]::FromArgb(255,128,0)
-        $mainForm.Text = "Warning -- $($dateTime)"
+        $mainForm.Text = "Warning - $($ServerName) - $($dateTime)"
     } elseif ($Level -eq "Red") {
         $mainForm.BackColor = [System.Drawing.Color]::FromArgb(255,0,0)
-        $mainForm.Text = "Alarm -- $($dateTime)"
+        $mainForm.Text = "Alarm - $($ServerName) - $($dateTime)"
     } else {
         $mainForm.BackColor = [System.Drawing.Color]::FromArgb(255,255,255)
-        $mainForm.Text = "Information -- $($dateTime)"
+        $mainForm.Text = "Information - $($ServerName) - $($dateTime)"
     }
     $mainForm.Icon = New-Object System.Drawing.Icon("$($PSScriptRoot)\chen_qianyu.ico")
     # 文本
