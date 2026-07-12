@@ -86,9 +86,16 @@ if (-not ($userConfig.javaArgs -is [array])) {
 }
 # Java参数空数组校验
 if ($userConfig.javaArgs.Count -eq 0) {
-    New-AsyncNotice `
-        -ScriptPath "$($PSScriptRoot)\ymsa_module\null_param_alarm_script.ps1" `
-        -UsePwSh $usePwShSwitch
+    $argList = @(
+        "-ExecutionPolicy","RemoteSigned",
+        "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
+        "-Level","Red",
+        "-Text","Java参数为空（5）",
+        "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
+        "-ServerName","`"$($userConfig.serverName)`"",
+        "-NoticeOnly"
+    )
+    Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
     exit
 }
 # Java路径有效性校验
