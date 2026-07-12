@@ -100,12 +100,19 @@ if ($userConfig.javaArgs.Count -eq 0) {
 }
 # Java路径有效性校验
 $javaPathFileName = Split-Path $userConfig.javaPath -Leaf -ErrorAction SilentlyContinue # 无视报错继续运行！
-if (-not $javaPathFileName -eq "java.exe") {
+if ($javaPathFileName -ne "java.exe") {
     # 我不信哪个Java发行版的可执行文件不是java.exe
     # 别跟我提跨平台，真要跨平台首先WinForms直接就炸了
-    New-AsyncNotice `
-        -ScriptPath "$($PSScriptRoot)\ymsa_module\java_path_void_alarm_script.ps1" `
-        -UsePwSh $usePwShSwitch
+    $argList = @(
+        "-ExecutionPolicy","RemoteSigned",
+        "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
+        "-Level","Red",
+        "-Text","Java路径无效（6）",
+        "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
+        "-ServerName","`"$($userConfig.serverName)`"",
+        "-NoticeOnly"
+    )
+    Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
     exit
 }
 if (-not (Test-Path $userConfig.javaPath)) {

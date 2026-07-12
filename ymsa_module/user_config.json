@@ -1,6 +1,6 @@
 {
-    "javaPath": "",
-    "javaArgs": [],
+    "javaPath": "1",
+    "javaArgs": ["1","2"],
     "serverName": "Minecraft Server",
     "carshTimeLimit": 900
 }
