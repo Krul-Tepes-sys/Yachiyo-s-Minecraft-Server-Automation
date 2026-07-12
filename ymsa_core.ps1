@@ -24,12 +24,24 @@ if ($PSVersionTable.PSVersion.Major -ge 7) {
 # 导入Json
 try {
     $userConfigRaw = Get-Content "$($PSScriptRoot)\ymsa_module\user_config.json" -Raw -ErrorAction Stop
+}
+catch {
+    $argList = @(
+        "-ExecutionPolicy","RemoteSigned",
+        "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
+        "-Level","Red",
+        "-Text","导入Json文件失败（1）",
+        "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
+        "-NoticeOnly"
+    )
+    Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
+    exit
+}
+# 解析Json
+try {
     $userConfig = ConvertFrom-Json $userConfigRaw -ErrorAction Stop
 }
 catch {
-    New-AsyncNotice `
-        -ScriptPath "$($PSScriptRoot)\ymsa_module\json_error_alarm_script.ps1" `
-        -UsePwSh $usePwShSwitch
     exit
 }
 # Java路径空字符串校验
