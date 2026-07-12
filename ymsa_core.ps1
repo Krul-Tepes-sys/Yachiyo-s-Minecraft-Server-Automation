@@ -57,9 +57,16 @@ catch {
 }
 # Java路径空字符串校验
 if ([string]::IsNullOrWhiteSpace($userConfig.javaPath)) {
-    New-AsyncNotice `
-        -ScriptPath "$($PSScriptRoot)\ymsa_module\null_param_alarm_script.ps1" `
-        -UsePwSh $usePwShSwitch
+    $argList = @(
+        "-ExecutionPolicy","RemoteSigned",
+        "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
+        "-Level","Red",
+        "-Text","Java路径为空（3）",
+        "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
+        "-ServerName","`"$($userConfig.serverName)`"",
+        "-NoticeOnly"
+    )
+    Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
     exit
 }
 # 校验Java参数是不是数组
