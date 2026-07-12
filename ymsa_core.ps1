@@ -116,9 +116,16 @@ if ($javaPathFileName -ne "java.exe") {
     exit
 }
 if (-not (Test-Path $userConfig.javaPath)) {
-    New-AsyncNotice `
-        -ScriptPath "$($PSScriptRoot)\ymsa_module\java_path_void_alarm_script.ps1" `
-        -UsePwSh $usePwShSwitch
+    $argList = @(
+        "-ExecutionPolicy","RemoteSigned",
+        "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
+        "-Level","Red",
+        "-Text","找不到Java路径指定的文件（7）",
+        "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
+        "-ServerName","`"$($userConfig.serverName)`"",
+        "-NoticeOnly"
+    )
+    Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
     exit
 }
 
