@@ -11,17 +11,14 @@ if ($PSVersionTable.PSVersion.Major -ge 7) {
     $hasPwSh = Get-Command pwsh.exe -ErrorAction SilentlyContinue
     # 什么叫你的PS7是绿色版并且没手动加path？
     if ($hasPwSh) {
-        $usePwShSwitch = $true
+        $pSName = "pwsh.exe"
     } else {
-        $usePwShSwitch = $false
+        Write-Warning "使用了PS7但在PATH里找不到PS7，部分逻辑将降级使用PS5.1"
+        $pSName = "powershell.exe"
     }
 } else {
-    $usePwShSwitch = $false
+    $pSName = "powershell.exe"
 }
-
-# 导入函数
-. "$($PSScriptRoot)\ymsa_module\function_new_makestar_alarm_dialog.ps1"
-. "$($PSScriptRoot)\ymsa_module\function_new_async_notice.ps1"
 
 # 用户配置检查
 # 导入Json
