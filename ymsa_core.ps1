@@ -21,6 +21,7 @@ if ($PSVersionTable.PSVersion.Major -ge 7) {
 }
 
 # 用户配置检查
+$allowContinue = $true
 # 导入Json
 try {
     $userConfigRaw = Get-Content "$($PSScriptRoot)\ymsa_module\user_config.json" -Raw -ErrorAction Stop
@@ -67,7 +68,7 @@ if ([string]::IsNullOrWhiteSpace($userConfig.javaPath)) {
         "-NoticeOnly"
     )
     Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
-    exit
+    $allowContinue = $false
 }
 # 校验Java参数是不是数组
 if (-not ($userConfig.javaArgs -is [array])) {
@@ -82,21 +83,22 @@ if (-not ($userConfig.javaArgs -is [array])) {
         "-NoticeOnly"
     )
     Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
-    exit
-}
-# Java参数空数组校验
-if ($userConfig.javaArgs.Count -eq 0) {
-    $argList = @(
-        "-ExecutionPolicy","RemoteSigned",
-        "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
-        "-Level","Red",
-        "-Text","Java参数为空（5）",
-        "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
-        "-ServerName","`"$($userConfig.serverName)`"",
-        "-NoticeOnly"
-    )
-    Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
-    exit
+    $allowContinue = $false
+} else {
+    # Java参数空数组校验
+    if ($userConfig.javaArgs.Count -eq 0) {
+        $argList = @(
+            "-ExecutionPolicy","RemoteSigned",
+            "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
+            "-Level","Red",
+            "-Text","Java参数为空（5）",
+            "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
+            "-ServerName","`"$($userConfig.serverName)`"",
+            "-NoticeOnly"
+        )
+        Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
+        $allowContinue = $false
+    }
 }
 # Java路径有效性校验
 $javaPathFileName = Split-Path $userConfig.javaPath -Leaf -ErrorAction SilentlyContinue # 无视报错继续运行！
@@ -113,19 +115,25 @@ if ($javaPathFileName -ne "java.exe") {
         "-NoticeOnly"
     )
     Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
-    exit
+    $allowContinue = $false
+} else {
+    if (-not (Test-Path $userConfig.javaPath)) {
+        $argList = @(
+            "-ExecutionPolicy","RemoteSigned",
+            "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
+            "-Level","Red",
+            "-Text","找不到Java路径指定的文件（7）",
+            "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
+            "-ServerName","`"$($userConfig.serverName)`"",
+            "-NoticeOnly"
+        )
+        Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
+        $allowContinue = $false
+    }
 }
-if (-not (Test-Path $userConfig.javaPath)) {
-    $argList = @(
-        "-ExecutionPolicy","RemoteSigned",
-        "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
-        "-Level","Red",
-        "-Text","找不到Java路径指定的文件（7）",
-        "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
-        "-ServerName","`"$($userConfig.serverName)`"",
-        "-NoticeOnly"
-    )
-    Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
+
+# 能继续吗？
+if (-not $allowContinue) {
     exit
 }
 
