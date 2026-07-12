@@ -72,9 +72,16 @@ if ([string]::IsNullOrWhiteSpace($userConfig.javaPath)) {
 # 校验Java参数是不是数组
 if (-not ($userConfig.javaArgs -is [array])) {
     # 萌新：哎这个方括号（数组）是什么？是不是写错了？我把它改成双引号（字符串）吧！这下对了！
-    New-AsyncNotice `
-        -ScriptPath "$($PSScriptRoot)\ymsa_module\param_type_error_alarm_script.ps1" `
-        -UsePwSh $usePwShSwitch
+    $argList = @(
+        "-ExecutionPolicy","RemoteSigned",
+        "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
+        "-Level","Red",
+        "-Text","Java参数类型必须是数组（4）",
+        "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
+        "-ServerName","`"$($userConfig.serverName)`"",
+        "-NoticeOnly"
+    )
+    Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
     exit
 }
 # Java参数空数组校验
