@@ -57,6 +57,7 @@ catch {
     exit
 }
 # Java路径空字符串校验
+$javaPathNotNull = $true
 if ([string]::IsNullOrWhiteSpace($userConfig.javaPath)) {
     $argList = @(
         "-ExecutionPolicy","RemoteSigned",
@@ -69,6 +70,7 @@ if ([string]::IsNullOrWhiteSpace($userConfig.javaPath)) {
     )
     Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
     $allowContinue = $false
+    $javaPathNotNull = $false
 }
 # 校验Java参数是不是数组
 if (-not ($userConfig.javaArgs -is [array])) {
@@ -101,34 +103,36 @@ if (-not ($userConfig.javaArgs -is [array])) {
     }
 }
 # Java路径有效性校验
-$javaPathFileName = Split-Path $userConfig.javaPath -Leaf -ErrorAction SilentlyContinue # 无视报错继续运行！
-if ($javaPathFileName -ne "java.exe") {
-    # 我不信哪个Java发行版的可执行文件不是java.exe
-    # 别跟我提跨平台，真要跨平台首先WinForms直接就炸了
-    $argList = @(
-        "-ExecutionPolicy","RemoteSigned",
-        "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
-        "-Level","Red",
-        "-Text","Java路径无效（6）",
-        "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
-        "-ServerName","`"$($userConfig.serverName)`"",
-        "-NoticeOnly"
-    )
-    Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
-    $allowContinue = $false
-} else {
-    if (-not (Test-Path $userConfig.javaPath)) {
+if ($javaPathNotNull) {
+    $javaPathFileName = Split-Path $userConfig.javaPath -Leaf -ErrorAction SilentlyContinue # 无视报错继续运行！
+    if ($javaPathFileName -ne "java.exe") {
+        # 我不信哪个Java发行版的可执行文件不是java.exe
+        # 别跟我提跨平台，真要跨平台首先WinForms直接就炸了
         $argList = @(
             "-ExecutionPolicy","RemoteSigned",
             "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
             "-Level","Red",
-            "-Text","找不到Java路径指定的文件（7）",
+            "-Text","Java路径无效（6）",
             "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
             "-ServerName","`"$($userConfig.serverName)`"",
             "-NoticeOnly"
         )
         Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
         $allowContinue = $false
+    } else {
+        if (-not (Test-Path $userConfig.javaPath)) {
+            $argList = @(
+                "-ExecutionPolicy","RemoteSigned",
+                "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
+                "-Level","Red",
+                "-Text","找不到Java路径指定的文件（7）",
+                "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
+                "-ServerName","`"$($userConfig.serverName)`"",
+                "-NoticeOnly"
+            )
+            Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
+            $allowContinue = $false
+        }
     }
 }
 
