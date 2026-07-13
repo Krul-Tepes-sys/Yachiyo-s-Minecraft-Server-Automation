@@ -20,6 +20,21 @@ if ($PSVersionTable.PSVersion.Major -ge 7) {
     $pSName = "powershell.exe"
 }
 
+# 函数
+function Show-YourMinecraftServerHasCrash {
+    # 再不封装后面那一大坨屎山就堆得更高了
+    $argList = @(
+    "-ExecutionPolicy","RemoteSigned",
+    "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
+    "-Level","Yellow",
+    "-Text","你服务器炸了（12）",
+    "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
+    "-ServerName","`"$($userConfig.serverName)`"",
+    "-NoticeOnly"
+    )
+    Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
+}
+
 # 用户配置检查
 $allowContinue = $true
 # 导入Json
@@ -165,6 +180,7 @@ while ($true) {
     & $userConfig.javaPath $userConfig.javaArgs
     $exitCode = $LASTEXITCODE
     if ($exitCode -eq 0) {
+        # 正常退出
         $exitDateTime = Get-Date
         $runTimeSpan = $exitDateTime - $startDateTime
         if ($runTimeSpan.TotalSeconds -le 60) {
@@ -193,8 +209,10 @@ while ($true) {
         Remove-Item "$($PSScriptRoot)\ymsa_module\temp_running_flag"
         exit
     } else {
+        # 非正常退出
         $crashCount++
         if ($crashCount -eq 1) {
+            # 第一次崩溃
             $firstCrashDateTime = Get-Date
             $runTimeSpan = $firstCrashDateTime - $startDateTime
             if ($runTimeSpan.TotalSeconds -le 1) {
@@ -210,30 +228,33 @@ while ($true) {
                 Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
                 Remove-Item "$($PSScriptRoot)\ymsa_module\temp_running_flag"
                 exit
-            } else {
-                New-AsyncNotice `
-                    -ScriptPath "$($PSScriptRoot)\ymsa_module\server_crash_warn_script.ps1" `
-                    -UsePwSh $usePwShSwitch
-            }
+            } else { Show-YourMinecraftServerHasCrash }
         } elseif ($crashCount -eq 2) {
+            # 第二次崩溃
             $secondCrashDateTime = Get-Date
             $runTimeSpan = $secondCrashDateTime - $firstCrashDateTime
             if ($runTimeSpan.TotalSeconds -gt $userConfig.carshTimeLimit) {
                 $crashCount = 0
-            } else {
-                New-AsyncNotice `
-                    -ScriptPath "$($PSScriptRoot)\ymsa_module\server_crash_warn_script.ps1" `
-                    -UsePwSh $usePwShSwitch
             }
+            Show-YourMinecraftServerHasCrash
         } elseif ($crashCount -ge 3) {
+            # 第三次崩溃
             $thirdCrashDateTime = Get-Date
             $runTimeSpan = $thirdCrashDateTime - $firstCrashDateTime
             if ($runTimeSpan.TotalSeconds -gt $userConfig.carshTimeLimit) {
                 $crashCount = 0
+                Show-YourMinecraftServerHasCrash
             } else {
-                New-AsyncNotice `
-                    -ScriptPath "$($PSScriptRoot)\ymsa_module\safe_mode_anti_infinite_crash_script.ps1" `
-                    -UsePwSh $usePwShSwitch
+                $argList = @(
+                    "-ExecutionPolicy","RemoteSigned",
+                    "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
+                    "-Level","Orange",
+                    "-Text","因服务端连续崩溃进入安全模式（13）",
+                    "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
+                    "-ServerName","`"$($userConfig.serverName)`"",
+                    "-NoticeOnly"
+                )
+                Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
                 Remove-Item "$($PSScriptRoot)\ymsa_module\temp_running_flag"
                 exit
             }
