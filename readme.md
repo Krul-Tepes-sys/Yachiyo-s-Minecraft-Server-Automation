@@ -12,13 +12,14 @@
 - 不再依赖BurntToast模块
 
 ## 使用方法
-- 点右上角绿色Code，点Download Zip（或者克隆仓库）
+- 点右边的Releases下载带Latest的Source Code（可以选老版本但不建议）
 - 解压并复制内容到你的服务端根目录
 - 编辑.\ymsa_module\user_config.json
 ```json
 {
     "javaPath": "", //Java路径，要精确到bin\java.exe
     "javaArgs": [], //Java参数，可以从服务器默认的启动脚本中复制过来，需要重新格式化成数组，如果不懂可以询问AI
+    "serverName": "Minecraft Server", //自定义服务器名，用于区分标记
     "carshTimeLimit": 900 //在多少秒内服务端连崩三次停服保护
 }
 ```
@@ -26,6 +27,9 @@
 - 双击ymsa_run.bat启动
 - （可选）使用ymsa_run_with_pwsh.bat用PS7启动
 - （可选）手动添加开机自启动
+
+## 其它说明
+- 「chen_qianyu.png」来源于「终末地表情包03」的「惊讶」
 
 ## 许可证
 - GPLv3
