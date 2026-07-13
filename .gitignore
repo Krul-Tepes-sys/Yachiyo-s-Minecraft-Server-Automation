@@ -9,3 +9,10 @@ user_jvm_args.txt
 logs/
 eula.txt
 ymsa_module/temp_running_flag
+world/
+banned-ips.json
+banned-players.json
+ops.json
+rhino.local.properties
+usercache.json
+whitelist.json

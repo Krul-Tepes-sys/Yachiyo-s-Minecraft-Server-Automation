@@ -165,6 +165,31 @@ while ($true) {
     & $userConfig.javaPath $userConfig.javaArgs
     $exitCode = $LASTEXITCODE
     if ($exitCode -eq 0) {
+        $exitDateTime = Get-Date
+        $runTimeSpan = $exitDateTime - $startDateTime
+        if ($runTimeSpan.TotalSeconds -le 60) {
+            $argList = @(
+                "-ExecutionPolicy","RemoteSigned",
+                "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
+                "-Level","Yellow",
+                "-Text","服务端退出过快（10）",
+                "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
+                "-ServerName","`"$($userConfig.serverName)`"",
+                "-NoticeOnly"
+            )
+            Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
+        } else {
+            $argList = @(
+                "-ExecutionPolicy","RemoteSigned",
+                "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
+                "-Level","White",
+                "-Text","服务端已关闭（11）",
+                "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
+                "-ServerName","`"$($userConfig.serverName)`"",
+                "-NoticeOnly"
+            )
+            Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
+        }
         Remove-Item "$($PSScriptRoot)\ymsa_module\temp_running_flag"
         exit
     } else {
