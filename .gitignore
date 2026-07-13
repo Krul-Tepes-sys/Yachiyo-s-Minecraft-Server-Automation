@@ -8,3 +8,4 @@ server.properties
 user_jvm_args.txt
 logs/
 eula.txt
+ymsa_module/temp_running_flag

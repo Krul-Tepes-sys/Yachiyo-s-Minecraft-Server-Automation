@@ -143,9 +143,16 @@ if (-not $allowContinue) {
 
 # 运行标记检查
 if (Test-Path "$($PSScriptRoot)\ymsa_module\temp_running_flag") {
-    New-AsyncNotice `
-        -ScriptPath "$($PSScriptRoot)\ymsa_module\safe_mode_anti_infinite_bsod_script.ps1" `
-        -UsePwSh $usePwShSwitch
+    $argList = @(
+        "-ExecutionPolicy","RemoteSigned",
+        "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
+        "-Level","Orange",
+        "-Text","因意外退出进入安全模式（8）",
+        "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
+        "-ServerName","`"$($userConfig.serverName)`"",
+        "-NoticeOnly"
+    )
+    Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
     exit
 } else {
     $null = New-Item "$($PSScriptRoot)\ymsa_module\temp_running_flag"
