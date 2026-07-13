@@ -172,10 +172,17 @@ while ($true) {
         if ($crashCount -eq 1) {
             $firstCrashDateTime = Get-Date
             $runTimeSpan = $firstCrashDateTime - $startDateTime
-            if ($runTimeSpan.TotalSeconds -le 15) {
-                New-AsyncNotice `
-                    -ScriptPath "$($PSScriptRoot)\ymsa_module\java_param_maybe_error_alarm_script.ps1" `
-                    -UsePwSh $usePwShSwitch
+            if ($runTimeSpan.TotalSeconds -le 1) {
+                $argList = @(
+                    "-ExecutionPolicy","RemoteSigned",
+                    "-File","$($PSScriptRoot)\ymsa_module\makestar_alarm_dialog.ps1",
+                    "-Level","Red",
+                    "-Text","Java参数可能有误（9）",
+                    "-HelpPath","$($PSScriptRoot)\ymsa_module\help.txt",
+                    "-ServerName","`"$($userConfig.serverName)`"",
+                    "-NoticeOnly"
+                )
+                Start-Process -WindowStyle Hidden -FilePath $pSName -ArgumentList $argList
                 Remove-Item "$($PSScriptRoot)\ymsa_module\temp_running_flag"
                 exit
             } else {
